@@ -1,4 +1,7 @@
 #!/usr/bin/env python3
+"""
+Dashboard avançado para gerenciamento do repositório DevOps-Lab-AWS
+"""
 import os
 import subprocess
 import webbrowser
@@ -78,6 +81,37 @@ def criar_pastas():
     console.print(Panel("📂 Estrutura de pastas criada/atualizada.", style="green"))
 
 # ----------------------------
+# Organizar estrutura do projeto
+# ----------------------------
+def organizar_estrutura():
+    console.print(Panel("🔄 Organizando estrutura do projeto...", style="cyan"))
+    
+    # Remover duplicatas
+    if os.path.exists("DevOps-Lab-AWS/DevOps-Lab-AWS"):
+        console.print("Removendo pasta duplicada...")
+        shutil.rmtree("DevOps-Lab-AWS/DevOps-Lab-AWS")
+    
+    # Mover arquivos de teste
+    if os.path.exists("arquivo_teste.txt"):
+        console.print("Movendo arquivo de teste...")
+        os.makedirs("tests/txt", exist_ok=True)
+        shutil.move("arquivo_teste.txt", "tests/txt/")
+    
+    # Criar estrutura de diretórios
+    console.print("Criando estrutura de diretórios...")
+    os.makedirs(".github/workflows", exist_ok=True)
+    os.makedirs("docs", exist_ok=True)
+    
+    # Manter diretórios no Git
+    for pasta in [".github/workflows", "docs", "app", "infra", "tests/txt", "tools"]:
+        gitkeep_path = os.path.join(pasta, ".gitkeep")
+        os.makedirs(pasta, exist_ok=True)
+        if not os.path.exists(gitkeep_path):
+            open(gitkeep_path, "w").close()
+    
+    console.print(Panel("✅ Estrutura organizada com sucesso!", style="green"))
+
+# ----------------------------
 # Atualização README
 # ----------------------------
 def atualizar_readme():
@@ -110,36 +144,6 @@ Thumbs.db
     console.print(Panel("⚙️ .gitignore atualizado.", style="green"))
 
 # ----------------------------
-# Organizar estrutura do projeto
-# ----------------------------
-def organizar_estrutura():
-    console.print(Panel("🗂️ Organizando estrutura do projeto...", style="cyan"))
-    
-    # Remover duplicatas
-    if os.path.exists("DevOps-Lab-AWS/DevOps-Lab-AWS"):
-        console.print("Removendo pasta duplicada...")
-        shutil.rmtree("DevOps-Lab-AWS/DevOps-Lab-AWS")
-    
-    # Mover arquivos de teste
-    if os.path.exists("arquivo_teste.txt"):
-        console.print("Movendo arquivo de teste...")
-        os.makedirs("tests/txt", exist_ok=True)
-        shutil.move("arquivo_teste.txt", "tests/txt/")
-    
-    # Criar estrutura de diretórios
-    console.print("Criando estrutura de diretórios...")
-    for pasta in [".github/workflows", "docs", "app", "infra", "tests/txt", "tools"]:
-        os.makedirs(pasta, exist_ok=True)
-    
-    # Manter diretórios no Git
-    for pasta in [".github/workflows", "docs", "app", "infra", "tests/txt", "tools"]:
-        gitkeep_path = os.path.join(pasta, ".gitkeep")
-        if not os.path.exists(gitkeep_path):
-            open(gitkeep_path, "w").close()
-    
-    console.print(Panel("✅ Estrutura organizada com sucesso!", style="green"))
-
-# ----------------------------
 # Operações Git
 # ----------------------------
 def sync_repo():
@@ -160,7 +164,7 @@ def sync_repo():
         run_cmd(f"git pull origin {MAIN_BRANCH} --rebase")
         console.print("✅ Pull concluído.", style="green")
     except subprocess.CalledProcessError:
-        console.print("❌ Conflito detectado! Resolva manualmente.", style="red")
+        console.print("❌ Conflito detected! Resolva manualmente.", style="red")
         exit(1)
     
     if stash_created:
@@ -205,7 +209,7 @@ def sync_commits():
     
     # Verificar e enviar commits locais
     if status["local_commits"]:
-        console.print(f"📤 Enviando {len(status['local_commits'])} commit(s) local(is)...", style="yellow")
+        console.print(f"📤 Enviando {len(status["local_commits"])} commit(s) local(is)...", style="yellow")
         console.print("Commits locais a serem enviados:", style="yellow")
         for commit in status["local_commits"]:
             console.print(f"  - {commit}", style="yellow")
@@ -222,7 +226,7 @@ def sync_commits():
     
     # Verificar e aplicar commits remotos
     if status["remote_commits"]:
-        console.print(f"📥 Aplicando {len(status['remote_commits'])} commit(s) remoto(s)...", style="yellow")
+        console.print(f"📥 Aplicando {len(status["remote_commits"])} commit(s) remoto(s)...", style="yellow")
         console.print("Commits remotos a serem aplicados:", style="yellow")
         for commit in status["remote_commits"]:
             console.print(f"  - {commit}", style="yellow")
@@ -378,4 +382,83 @@ def gerenciador_arquivos():
                         shutil.copy2(origem_path, destino_path)
                     console.print("✅ Arquivo/pasta copiado com sucesso!", style="green")
                 except Exception as e:
-                    console.print(f"❌ Erro ao copiar: {
+                    console.print(f"❌ Erro ao copiar: {e}", style="red")
+            else:
+                console.print("❌ Arquivo/pasta de origem não encontrado!", style="red")
+            input("Pressione Enter para continuar...")
+            
+        elif escolha == "5":
+            alvo = Prompt.ask("Digite o nome do arquivo/pasta para deletar")
+            alvo_path = os.path.join(current_dir, alvo)
+            
+            if os.path.exists(alvo_path):
+                if Prompt.ask(f"Tem certeza que deseja deletar {alvo}?", choices=["s","n"], default="n") == "s":
+                    try:
+                        if os.path.isdir(alvo_path):
+                            shutil.rmtree(alvo_path)
+                        else:
+                            os.remove(alvo_path)
+                        console.print("✅ Arquivo/pasta deletado com sucesso!", style="green")
+                    except Exception as e:
+                        console.print(f"❌ Erro ao deletar: {e}", style="red")
+            else:
+                console.print("❌ Arquivo/pasta não encontrado!", style="red")
+            input("Pressione Enter para continuar...")
+            
+        elif escolha == "6":
+            nome_pasta = Prompt.ask("Digite o nome da nova pasta")
+            nova_pasta_path = os.path.join(current_dir, nome_pasta)
+            
+            try:
+                os.makedirs(nova_pasta_path, exist_ok=True)
+                console.print("✅ Pasta criada com sucesso!", style="green")
+            except Exception as e:
+                console.print(f"❌ Erro ao criar pasta: {e}", style="red")
+            input("Pressione Enter para continuar...")
+            
+        elif escolha == "0":
+            break
+
+# ----------------------------
+# Dashboard interativo
+# ----------------------------
+def mega_dashboard():
+    while True:
+        console.clear()
+        status = get_status()
+        table, panel_commits = draw_dashboard(status)
+        console.print(table)
+        console.print(panel_commits)
+        console.print("\nMenu:")
+        console.print("[1] Sincronizar repositório")
+        console.print("[2] Criar/Atualizar pastas")
+        console.print("[3] Organizar estrutura do projeto")
+        console.print("[4] Atualizar README.md")
+        console.print("[5] Atualizar .gitignore")
+        console.print("[6] Commit alterações")
+        console.print("[7] Criar branch + PR")
+        console.print("[8] Sincronizar commits (push/pull)")
+        console.print("[9] Gráfico: commits por branch")
+        console.print("[10] Gráfico: commits por dia da semana")
+        console.print("[11] Gráfico: alterações por pasta")
+        console.print("[12] Gerenciador de arquivos")
+        console.print("[0] Sair")
+        escolha = Prompt.ask("Escolha a ação", choices=["1","2","3","4","5","6","7","8","9","10","11","12","0"], default="0")
+        if escolha=="1": sync_repo()
+        elif escolha=="2": criar_pastas()
+        elif escolha=="3": organizar_estrutura()
+        elif escolha=="4": atualizar_readme()
+        elif escolha=="5": atualizar_gitignore()
+        elif escolha=="6": commit_changes()
+        elif escolha=="7": criar_branch_e_pr()
+        elif escolha=="8": sync_commits()
+        elif escolha=="9": plot_commits()
+        elif escolha=="10": plot_commits_weekday()
+        elif escolha=="11": plot_changes_per_folder()
+        elif escolha=="12": gerenciador_arquivos()
+        elif escolha=="0":
+            console.print("👋 Saindo...", style="yellow")
+            break
+
+if __name__=="__main__":
+    mega_dashboard()
