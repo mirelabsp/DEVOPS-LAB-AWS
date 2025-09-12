@@ -1,8 +1,3 @@
-# Faça backup do arquivo atual
-cp tools/repo_dashboard.py tools/repo_dashboard_backup.py
-
-# Crie um novo arquivo corrigido
-cat > tools/repo_dashboard.py << 'EOF'
 #!/usr/bin/env python3
 """
 Dashboard avançado para gerenciamento do repositório DevOps-Lab-AWS
