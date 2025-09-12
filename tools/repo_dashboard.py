@@ -20,7 +20,7 @@ from rich.text import Text
 
 console = Console()
 MAIN_BRANCH = "main"
-PASTAS = ["app", "infra", "tests/txt", "docs", ".github/workflows"]
+PASTAS = ["app", "infra", "tests", "docs", ".github/workflows"]
 REPO_URL = "https://github.com/mirelabsp/DevOps-Lab-AWS.git"
 
 # ----------------------------
@@ -92,10 +92,11 @@ def organizar_estrutura():
         shutil.rmtree("DevOps-Lab-AWS/DevOps-Lab-AWS")
     
     # Mover arquivos de teste
-    if os.path.exists("arquivo_teste.txt"):
-        console.print("Movendo arquivo de teste...")
-        os.makedirs("tests/txt", exist_ok=True)
-        shutil.move("arquivo_teste.txt", "tests/txt/")
+    test_files = [f for f in os.listdir('.') if f.startswith('arquivo_teste') or f.startswith('teste')]
+    for test_file in test_files:
+        console.print(f"Movendo {test_file}...")
+        os.makedirs("tests", exist_ok=True)
+        shutil.move(test_file, "tests/")
     
     # Criar estrutura de diretórios
     console.print("Criando estrutura de diretórios...")
@@ -103,7 +104,7 @@ def organizar_estrutura():
     os.makedirs("docs", exist_ok=True)
     
     # Manter diretórios no Git
-    for pasta in [".github/workflows", "docs", "app", "infra", "tests/txt", "tools"]:
+    for pasta in [".github/workflows", "docs", "app", "infra", "tests", "tools"]:
         gitkeep_path = os.path.join(pasta, ".gitkeep")
         os.makedirs(pasta, exist_ok=True)
         if not os.path.exists(gitkeep_path):
@@ -164,7 +165,7 @@ def sync_repo():
         run_cmd(f"git pull origin {MAIN_BRANCH} --rebase")
         console.print("✅ Pull concluído.", style="green")
     except subprocess.CalledProcessError:
-        console.print("❌ Conflito detected! Resolva manualmente.", style="red")
+        console.print("❌ Conflito detectado! Resolva manualmente.", style="red")
         exit(1)
     
     if stash_created:
@@ -209,7 +210,7 @@ def sync_commits():
     
     # Verificar e enviar commits locais
     if status["local_commits"]:
-        console.print(f"📤 Enviando {len(status["local_commits"])} commit(s) local(is)...", style="yellow")
+        console.print(f"📤 Enviando {len(status['local_commits'])} commit(s) local(is)...", style="yellow")
         console.print("Commits locais a serem enviados:", style="yellow")
         for commit in status["local_commits"]:
             console.print(f"  - {commit}", style="yellow")
@@ -226,7 +227,7 @@ def sync_commits():
     
     # Verificar e aplicar commits remotos
     if status["remote_commits"]:
-        console.print(f"📥 Aplicando {len(status["remote_commits"])} commit(s) remoto(s)...", style="yellow")
+        console.print(f"📥 Aplicando {len(status['remote_commits'])} commit(s) remoto(s)...", style="yellow")
         console.print("Commits remotos a serem aplicados:", style="yellow")
         for commit in status["remote_commits"]:
             console.print(f"  - {commit}", style="yellow")
@@ -286,7 +287,7 @@ def plot_changes_per_folder():
     input("Pressione Enter para voltar ao menu...")
 
 # ----------------------------
-# Gerenciador de arquivos - Parte Corrigida
+# Gerenciador de arquivos
 # ----------------------------
 def gerenciador_arquivos():
     current_dir = os.getcwd()
@@ -382,7 +383,7 @@ def gerenciador_arquivos():
                         shutil.copy2(origem_path, destino_path)
                     console.print("✅ Arquivo/pasta copiado com sucesso!", style="green")
                 except Exception as e:
-                    console.print(f"❌ Erro ao copiar: {e}", style="red")  # LINHA CORRIGIDA
+                    console.print(f"❌ Erro ao copiar: {e}", style="red")
             else:
                 console.print("❌ Arquivo/pasta de origem não encontrado!", style="red")
             input("Pressione Enter para continuar...")
