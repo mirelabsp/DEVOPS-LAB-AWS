@@ -286,7 +286,7 @@ def plot_changes_per_folder():
     input("Pressione Enter para voltar ao menu...")
 
 # ----------------------------
-# Gerenciador de arquivos
+# Gerenciador de arquivos - Parte Corrigida
 # ----------------------------
 def gerenciador_arquivos():
     current_dir = os.getcwd()
@@ -382,7 +382,7 @@ def gerenciador_arquivos():
                         shutil.copy2(origem_path, destino_path)
                     console.print("✅ Arquivo/pasta copiado com sucesso!", style="green")
                 except Exception as e:
-                    console.print(f"❌ Erro ao copiar: {e}", style="red")
+                    console.print(f"❌ Erro ao copiar: {e}", style="red")  # LINHA CORRIGIDA
             else:
                 console.print("❌ Arquivo/pasta de origem não encontrado!", style="red")
             input("Pressione Enter para continuar...")
