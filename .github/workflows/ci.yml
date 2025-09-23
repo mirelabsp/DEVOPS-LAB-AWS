@@ -39,3 +39,45 @@ jobs:
           fi
 
           echo "Validação mínima concluída com sucesso."
+
+          name: CI
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  test-api:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout código
+        uses: actions/checkout@v3
+
+      - name: Configurar Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.12"
+
+      - name: Instalar dependências do projeto
+        run: |
+          python -m venv venv
+          source venv/bin/activate
+          pip install -r requirements.txt
+
+      - name: Iniciar API Flask em background
+        run: |
+          source venv/bin/activate
+          nohup python app/main.py & 
+          sleep 5  # espera a API subir
+
+      - name: Instalar Newman (CLI do Postman)
+        run: |
+          npm install -g newman
+
+      - name: Rodar testes Postman
+        run: |
+          newman run tests/health-check.postman_collection.json
+
